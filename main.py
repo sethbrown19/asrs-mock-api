@@ -1,6 +1,24 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from enum import Enum
+
 
 app = FastAPI()
+
+
+
+class TaskType(str, Enum):
+    stow = "stow"
+    retrieve = "retrieve"
+
+class Task(BaseModel):
+    task_id: str
+    type: TaskType
+    ndc: str
+    quantity: int
+    
+class TaskResponse(Task):
+    status: str
 
 @app.get("/")
 def root():
@@ -10,9 +28,9 @@ def root():
 def hello():
     return {"message": "hello from ASRS mock API"}
 
-#@app.post("/task")
-#def create_retrieve_task():
-    #if DAE requests replenishment
-    # take payload from DAE on needs
-    # pass the to the ASRS
-    # return status code 202 that the ASRS has accpeted the request
+@app.post("/tasks", response_model=TaskResponse, status_code=202)
+def create_retrieve_task(task : Task, ):
+    return {
+        **task.model_dump(),
+        "status": "accepted"
+    }

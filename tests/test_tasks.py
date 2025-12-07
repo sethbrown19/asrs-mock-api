@@ -18,6 +18,7 @@ def test_create_retrieve_task_happy_path():
         "type": "retrieve",
         "ndc": "NDC_0001",
         "quantity": 10,
+        "status": "accepted"
     }
     assert response.json() == expected
 
