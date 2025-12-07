@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import Annotated
 from pydantic import BaseModel, Field
 from enum import Enum
 
 app = FastAPI()
+
+tasks_db = {}
 
 class TaskType(str, Enum):
     stow = "stow"
@@ -28,7 +30,14 @@ def hello():
 
 @app.post("/tasks", response_model=TaskResponse, status_code=202)
 def create_retrieve_task(task : Task):
-    return {
-        **task.model_dump(),
-        "status": "accepted"
-    }
+    response = TaskResponse(**task.model_dump(), status= "accepted")
+    tasks_db[task.task_id] = response
+    return response
+
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task(task_id: str):
+    if task_id not in tasks_db:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return tasks_db[task_id]
+
+
