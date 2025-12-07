@@ -1,11 +1,9 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field
 from enum import Enum
 
-
 app = FastAPI()
-
-
 
 class TaskType(str, Enum):
     stow = "stow"
@@ -15,7 +13,7 @@ class Task(BaseModel):
     task_id: str
     type: TaskType
     ndc: str
-    quantity: int
+    quantity: Annotated[int, Field(gt=0)]
     
 class TaskResponse(Task):
     status: str
@@ -29,7 +27,7 @@ def hello():
     return {"message": "hello from ASRS mock API"}
 
 @app.post("/tasks", response_model=TaskResponse, status_code=202)
-def create_retrieve_task(task : Task, ):
+def create_retrieve_task(task : Task):
     return {
         **task.model_dump(),
         "status": "accepted"
